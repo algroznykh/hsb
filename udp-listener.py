@@ -2,7 +2,6 @@
 A script to run a command on recieving an UDP packet.
 Configuration file example:
 [udp-server]
-udp-ip = 127.0.0.1
 udp-port = 1234
 [commands]
 open_door = /usr/bin/open_door.sh
@@ -72,9 +71,9 @@ if __name__ == '__main__':
     confparser = SafeConfigParser()
     confparser.read(args.config)
     command_pool = dict(confparser.items('commands'))
-    sock = socket.socket(socket.AF_INET, # Internet
+    sock = socket.socket(socket.AF_INET6, # Internet
                      socket.SOCK_DGRAM) # UDP
-    udp_ip = confparser.get('udp-server', 'udp-ip')
+    udp_ip = ''
     udp_port = confparser.getint('udp-server', 'udp-port')
     sock.bind((udp_ip, udp_port))
     listen()
