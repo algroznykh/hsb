@@ -4,6 +4,9 @@ Configuration file example:
 [udp-server]
 udp-port = 1234
 command = notify-send
+log-file = /usr/local/var/log/udp-listener.log
+
+(c) 2016 Aleksandr Groznykh <groznykh.aleksandr@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,8 +32,6 @@ import subprocess
 import re
 
 RX = r"COMMAND=(?P<name>.*?)&RANDOM_BLOB=(?P<id>.+?==)"
-logging.basicConfig(format = '%(asctime)s %(levelname)s %(message)s',
-                    stream=sys.stdout, level=logging.DEBUG)
 id_len = 5
 
 def listen():
@@ -62,6 +63,10 @@ if __name__ == '__main__':
     args = argparser.parse_args()
     confparser = SafeConfigParser()
     confparser.read(args.config)
+    logging.basicConfig(format = '%(asctime)s %(levelname)s %(message)s',
+                        strea=sys.stdout,
+                        filename=confparser.get('udp-server', 'log-file'),
+                        level=logging.DEBUG)
     sock = socket.socket(socket.AF_INET6, # Internet
                      socket.SOCK_DGRAM) # UDP
     udp_ip = ''
