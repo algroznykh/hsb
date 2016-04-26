@@ -3,9 +3,7 @@ A script to run a command on recieving an UDP packet.
 Configuration file example:
 [udp-server]
 udp-port = 1234
-[commands]
-open_door = /usr/bin/open_door.sh
-open_fire = /usr/bin/open_fire.sh
+command = notify-send
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -48,17 +46,11 @@ def listen():
             logging.error("Cannot parse the message")
             continue
         elif m.group('id') not in curids:
-            m.group('name')
             curids.append(m.group('id'))
-            command = command_pool.get(m.group('name'))
-            if not command:
-                logging.error("Unknown command: '{}'"
-                        .format(m.group('name')))
-                continue
-            logging.info('receved "{}": running "{}"'
-                    .format(m.group('name'), command))
+            logging.info('Running "{}" with argument: "{}"'
+                    .format(command, m.group('name')))
             try:
-                rc = subprocess.Popen([command])
+                subprocess.Popen([command, m.group('name')])
             except Exception, e:
                 logging.error('An error occured while running "{}": {}'
                         .format(command, e))
@@ -70,11 +62,11 @@ if __name__ == '__main__':
     args = argparser.parse_args()
     confparser = SafeConfigParser()
     confparser.read(args.config)
-    command_pool = dict(confparser.items('commands'))
     sock = socket.socket(socket.AF_INET6, # Internet
                      socket.SOCK_DGRAM) # UDP
     udp_ip = ''
     udp_port = confparser.getint('udp-server', 'udp-port')
+    command = confparser.get('udp-server', 'command')
     sock.bind((udp_ip, udp_port))
     listen()
 
